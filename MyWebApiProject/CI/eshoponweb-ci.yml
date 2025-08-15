@@ -5,7 +5,8 @@
 resources:
   repositories:
     - repository: self
-      trigger: none
+      trigger: 
+      - master
 
 stages:
 - stage: Build
@@ -51,6 +52,35 @@ stages:
     - task: PublishPipelineArtifact@1
       displayName: Publish Artifacts ADO - Bicep
       inputs:
-        targetPath: '$(Build.SourcesDirectory)/infra/webapp.bicep'
+        targetPath: '$(Build.SourcesDirectory)/MyWebApiProject/infra/webapp.bicep'
         artifact: 'Bicep'
         publishLocation: 'pipeline'
+
+- stage: Deploy
+  displayName: Deploy to an Azure Web App
+  jobs:
+    - deployment: Deploy
+      environment: approvals
+      pool:
+        vmImage: "windows-latest"
+      strategy:
+        runOnce:
+          deploy:
+            steps: 
+            - task: DownloadBuildArtifacts@1
+              inputs:
+                buildType: 'current'
+                downloadType: 'single'
+                artifactName: 'Website'
+                downloadPath: '$(Build.ArtifactStagingDirectory)'
+            
+            - task: AzureRmWebAppDeployment@5
+              inputs:
+                ConnectionType: 'AzureRM'
+                azureSubscription: 'azure subs'
+                appType: 'webApp'
+                WebAppName: 'eshoponWebYAML53829428'
+                packageForLinux: '$(Build.ArtifactStagingDirectory)/**/MyWebApiProject.zip'
+                ConfigurationSettings: '-UseOnlyInMemoryDatabase true -ASPNETCORE_ENVIRONMENT Development'
+
+    
