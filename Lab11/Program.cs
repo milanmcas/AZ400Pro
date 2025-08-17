@@ -11,7 +11,7 @@ namespace Lab11
             // Add services to the container.
             //const string ConnectionString = "Endpoint=https://appcs-53852658.azconfig.io;Id=pFK4;Secret=5JjBVCVF96ZTpmmkKewPL0LF0EBmsTMv3suvoWlRTVQ1wOgQ3ubuJQQJ99BHAC8vTIndyv2KAAACAZAC8YWL";
 
-            builder.Services.Configure<MyConfig>(builder.Configuration.GetSection("MyNiceConfig"));
+            //builder.Services.Configure<MyConfig>(builder.Configuration.GetSection("MyNiceConfig"));
             //builder.Configuration.AddAzureAppConfiguration(options =>
             //{
             //    options.Connect(ConnectionString).ConfigureRefresh((refreshOptions) =>
