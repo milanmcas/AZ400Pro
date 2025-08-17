@@ -1,0 +1,52 @@
+﻿# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- master
+
+resources:
+- repo: self
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'b06c3bc3-e009-41d8-ab51-97269c5b2585'
+  imageRepository: 'milanapp'
+  containerRegistry: 'crxtssaqm3zmud2.azurecr.io'
+  dockerfilePath: '$(Build.SourcesDirectory)/dockerapp/Dockerfile'
+  tag: '$(Build.BuildId)'
+  azureServiceConnection: 'azure subs'
+  resourceGroup: 'AZ400-RG153837340'
+  location: 'westus2'
+  appName: ''
+  subscriptionId: 'ab0e0b64-4884-49d4-8d36-c843028b1e21'
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        includeLatestTag: true
+        tags: |
+          $(Build.BuildId)
+          latest
+
+    - task: AzureWebAppContainer@1
+      displayName: Deploy Azure App Service
+      inputs:
+        azureSubscription: $(azureServiceConnection) # Variable for your Azure service connection
+        appName: $(appName) # Variable for your App Service name
+        containers: $(containerRegistry)/$(imageRepository):$(Build.BuildId) # Full image name with tag
