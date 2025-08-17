@@ -3,8 +3,8 @@
 # Trigger CD when CI executed succesfully
 resources:
   pipelines:
-    - pipeline: eshoponweb-ci
-      source: eshoponweb-ci # given pipeline name
+    - pipeline: milanpro_ci
+      source: milanpro_ci # given pipeline name
       trigger: true
 
 
@@ -27,7 +27,7 @@ stages:
       vmImage: windows-latest
     steps:
     #download artifacts
-    - download: eshoponweb-ci
+    - download: milanpro_ci
   
     # Deploy App Service Plan + App Service using Bicep
     - task: AzureResourceManagerTemplateDeployment@3
@@ -40,7 +40,7 @@ stages:
         resourceGroupName: '$(resource-group)'
         location: '$(location)'
         templateLocation: 'Linked artifact'
-        csmFile: '$(Pipeline.Workspace)/Bicep/$(templateFile)'
+        csmFile: '$(Pipeline.Workspace)/milanpro_ci/Bicep/$(templateFile)'
         overrideParameters: '-webAppName $(webappname) -location $(location)'
         deploymentMode: 'Incremental'
         deploymentOutputs: 'asp-json'
@@ -53,7 +53,7 @@ stages:
         azureSubscription: '$(azureserviceconnection)'
         appType: 'webApp'
         WebAppName: '$(webappname)'
-        packageForLinux: '$(Pipeline.Workspace)/Website/Web.zip'
+        packageForLinux: '$(Pipeline.Workspace)/milanpro_ci/Website/Lab11.zip'
       
 
     

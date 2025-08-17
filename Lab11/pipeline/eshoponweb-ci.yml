@@ -33,7 +33,7 @@ stages:
       displayName: Test
       inputs:
         command: 'test'
-        projects: 'tests/UnitTests/*.csproj'
+        projects: '$(Build.SourcesDirectory)/UnitTests/*.csproj'
     
     - task: DotNetCoreCLI@2
       displayName: Publish
@@ -52,6 +52,6 @@ stages:
     - task: PublishPipelineArtifact@1
       displayName: Publish Artifacts ADO - Bicep
       inputs:
-        targetPath: '$(Build.SourcesDirectory)/infra/webapp.bicep'
+        targetPath: '$(Build.SourcesDirectory)/Lab11/infra/webapp.bicep'
         artifact: 'Bicep'
         publishLocation: 'pipeline'
