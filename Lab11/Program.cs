@@ -12,14 +12,23 @@ namespace Lab11
             const string ConnectionString = "Endpoint=https://appcs-53852658.azconfig.io;Id=pFK4;Secret=5JjBVCVF96ZTpmmkKewPL0LF0EBmsTMv3suvoWlRTVQ1wOgQ3ubuJQQJ99BHAC8vTIndyv2KAAACAZAC8YWL";
 
             builder.Services.Configure<MyConfig>(builder.Configuration.GetSection("MyNiceConfig"));
+            //builder.Configuration.AddAzureAppConfiguration(options =>
+            //{
+            //    options.Connect(ConnectionString).ConfigureRefresh((refreshOptions) =>
+            //    {
+            //        // indicates that all configuration should be refreshed when the given key has changed.
+            //        refreshOptions.Register(key: "MyNiceConfig:PageSize", refreshAll: true).SetCacheExpiration(TimeSpan.FromSeconds(10));
+            //        //refreshOptions.SetCacheExpiration(TimeSpan.FromSeconds(5));
+            //    }).UseFeatureFlags();
+            //});
             builder.Configuration.AddAzureAppConfiguration(options =>
             {
-                options.Connect(ConnectionString).ConfigureRefresh((refreshOptions) =>
-                {
-                    // indicates that all configuration should be refreshed when the given key has changed.
-                    refreshOptions.Register(key: "MyNiceConfig:PageSize", refreshAll: true).SetCacheExpiration(TimeSpan.FromSeconds(10));
-                    //refreshOptions.SetCacheExpiration(TimeSpan.FromSeconds(5));
-                }).UseFeatureFlags();
+                options.Connect(ConnectionString)
+                       .ConfigureRefresh(refresh =>
+                       {
+                           refresh.Register("MyNiceConfig:PageSize", true);
+                       })
+                       .Select("MyNiceConfig:*");
             });
             builder.Services.AddAzureAppConfiguration();
             builder.Services.AddFeatureManagement();
