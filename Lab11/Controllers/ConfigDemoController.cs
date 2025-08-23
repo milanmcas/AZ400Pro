@@ -8,9 +8,9 @@ namespace Lab11.Controllers
     [ApiController]
     public class ConfigDemoController : ControllerBase
     {
-        private readonly IOptions<MyConfig> _config;
+        private readonly IOptionsSnapshot<MyConfig> _config;
 
-        public ConfigDemoController(IOptions<MyConfig> config)
+        public ConfigDemoController(IOptionsSnapshot<MyConfig> config)
             => _config = config;
 
         [HttpGet()]

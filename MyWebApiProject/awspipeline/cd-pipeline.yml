@@ -1,0 +1,75 @@
+﻿trigger:
+  - master
+
+resources:
+  pipelines:
+    - pipeline: CI_Pipeline
+      source: CI_Pipeline
+      trigger:
+        branches:
+          include:
+            - master
+
+stages:
+- stage: DeployToEC2
+  displayName: 'Deploy to EC2 Instance'
+  jobs:
+  - deployment: DeployApp
+    displayName: 'Deploy Application'
+    environment: 'EC2DeploymentEnvironment'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: CI_Pipeline
+            artifact: drop
+
+          - task: CopyFilesOverSSH@0
+            displayName: 'Copy artifacts to EC2'
+            inputs:
+              sshEndpoint: 'awsconnection'
+              sourceFolder: '$(Pipeline.Workspace)/CI_Pipeline/drop'
+              contents: '**'
+              targetFolder: '/tmp/deployment'
+
+          - task: SSH@0
+            displayName: 'Deploy via SSH to EC2'
+            inputs:
+              sshEndpoint: 'awsconnection'
+              runOptions: 'inline'
+              inline: |
+                echo "✅ Checking nginx and deployment directory..."
+
+                # Install nginx if missing
+                if ! command -v nginx &> /dev/null; then
+                  echo "Installing nginx..."
+                  if [ -x "$(command -v apt)" ]; then
+                    sudo apt update && sudo apt install nginx -y
+                  elif [ -x "$(command -v yum)" ]; then
+                    sudo yum install nginx -y
+                  else
+                    echo "❌ Unsupported package manager. Please install nginx manually."
+                    exit 1
+                  fi
+                fi
+
+                # Ensure web root exists
+                sudo mkdir -p /var/www/html/
+
+                echo "🧹 Cleaning existing deployment..."
+                sudo rm -rf /var/www/html/*
+
+                echo "📦 Copying new files..."
+                sudo cp -r /tmp/deployment/* /var/www/html/
+
+                echo "📂 Listing deployed files:"
+                ls -l /var/www/html/
+
+                echo "🔄 Restarting nginx..."
+                sudo systemctl restart nginx || echo "⚠️ Failed to restart nginx"
+
+                echo "🔄 Reloading systemd daemon and restarting milanappserver service..."
+                sudo systemctl daemon-reload
+                sudo systemctl restart milanappserver || echo "⚠️ Failed to restart milanappserver service"
+
+                echo "✅ Deployment complete."

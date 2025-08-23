@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 
 namespace Lab11
@@ -21,15 +22,30 @@ namespace Lab11
             //        //refreshOptions.SetCacheExpiration(TimeSpan.FromSeconds(5));
             //    }).UseFeatureFlags();
             //});
+            builder.Services.AddFeatureManagement(builder.Configuration.GetSection("TestFeature"));
+            //builder.Configuration.AddAzureAppConfiguration(options =>
+            //{
+            //    options.Connect(ConnectionString)
+            //           .ConfigureRefresh(refresh =>
+            //           {
+            //               refresh.Register("TestFeature", refreshAll: true);
+            //               //refresh.Register("MyNiceConfig:PageSize", true).
+            //               //SetCacheExpiration(TimeSpan.FromSeconds(30)); ;
+            //           })
+            //           .Select("MyNiceConfig:*").UseFeatureFlags();
+            //});
             builder.Configuration.AddAzureAppConfiguration(options =>
-            {
-                options.Connect(ConnectionString)
-                       .ConfigureRefresh(refresh =>
-                       {
-                           refresh.Register("MyNiceConfig:PageSize", true);
-                       })
-                       .Select("MyNiceConfig:*");
-            });
+                options.Connect(ConnectionString).
+                ConfigureRefresh(refresh =>
+                {
+                    refresh.Register("TestFeature", refreshAll: true).SetCacheExpiration(TimeSpan.FromSeconds(10));
+                })
+                .UseFeatureFlags(featureFlagOptions =>
+                {
+                    // Default cache expiration is 30 seconds
+                    featureFlagOptions.CacheExpirationInterval = TimeSpan.FromSeconds(10);
+                })
+            );
             builder.Services.AddAzureAppConfiguration();
             builder.Services.AddFeatureManagement();
             builder.Services.AddControllers();
@@ -42,7 +58,7 @@ namespace Lab11
 
             app.UseAuthorization();
             app.UseAzureAppConfiguration();
-
+            
             app.MapControllers();
 
             app.Run();

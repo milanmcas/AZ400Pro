@@ -1,0 +1,6 @@
+@AWSsnsApi_HostAddress = http://localhost:5014
+
+GET {{AWSsnsApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

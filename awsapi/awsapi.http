@@ -1,0 +1,6 @@
+@awsapi_HostAddress = http://localhost:5286
+
+GET {{awsapi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
