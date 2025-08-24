@@ -1,5 +1,11 @@
+using Amazon;
+using Amazon.DynamoDBv2;
+using Amazon.Runtime;
 using Amazon.S3;
+using awsapi.Repository;
+using awsapi.Services;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace awsapi
 {
@@ -15,6 +21,19 @@ namespace awsapi
             //builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions());
             builder.Services.AddDefaultAWSOptions(builder.Configuration.GetAWSOptions("AWS"));
             builder.Services.AddAWSService<IAmazonS3>();
+            builder.Services.AddSingleton<IAmazonDynamoDB, AmazonDynamoDBClient>();
+            builder.Services.AddSingleton<ICustomerRepository, CustomerRepository>();
+            builder.Services.AddSingleton<ICustomerService, CustomerService>();
+            //builder.Services.AddSingleton<IAmazonS3>(sp =>
+            //{
+            //    var config = new AmazonS3Config
+            //    {
+            //        RegionEndpoint = RegionEndpoint.USEast1 // Choose your region
+            //    };
+            //    var credentials = new BasicAWSCredentials("YOUR_ACCESS_KEY", "YOUR_SECRET_KEY");
+
+            //    return new AmazonS3Client(credentials, config);
+            //});
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
