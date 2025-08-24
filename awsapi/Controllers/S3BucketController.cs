@@ -43,6 +43,7 @@ namespace awsapi.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+        [NonAction]
         public async Task SetVersioningAsync(bool enableVersioning)
         {
             var versioningConfig = new S3BucketVersioningConfig
@@ -65,6 +66,7 @@ namespace awsapi.Controllers
                 throw new Exception($"An error occurred while setting versioning: {ex.Message}");
             }
         }
+        [NonAction]
         public async Task<List<S3ObjectVersion>> ListObjectVersionsAsync(string key)
         {
             var versions = new List<S3ObjectVersion>();
